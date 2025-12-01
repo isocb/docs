@@ -1,0 +1,116 @@
+# IsoStack Core Documentation
+
+Welcome to the **Core** section of the IsoStack documentation.  
+This folder defines the foundational architecture, capabilities, and system behaviour that every IsoStack-based application inherits.
+
+IsoStack Core provides:
+
+- **Multi-tenant architecture**
+- **Platform-level administration**
+- **Authentication & session security**
+- **Role & permission framework**
+- **Organisation management**
+- **Feature flags & module enablement**
+- **Branding & settings engine**
+- **Tooltip system (two-tier model)**
+- **Audit logging**
+- **Core UI components, layouts, and providers**
+
+These documents serve as the authoritative reference for all developers working on the IsoStack platform—internal developers, future contributors, and AI agents.
+
+---
+
+## 📁 Contents of `/core/`
+
+### **1. Roles & Permissions**
+`roles-and-permissions.md`  
+Defines tenant roles (MEMBER/ADMIN/OWNER), Platform Admin, permissions matrix, and enforcement patterns.
+
+### **2. Roadmap**
+`roadmap.md`  
+Shows the delivered functionality and planned platform features such as organisation status management, platform admin org-switching, and UX improvements.
+
+### **3. Design Rationale**
+`design-rationale.md`  
+Explains why IsoStack is structured the way it is. Prevents architectural drift or regression.
+
+### **4. Architecture Overview**
+(coming soon or based on future input)  
+High-level explanation of the core stack, Next.js App Router structure, tRPC setup, Prisma, Neon, and Mantine.
+
+### **5. Settings & Feature Flags**
+(placeholder)  
+Will document:
+- Tenant-level configuration  
+- Platform-level configuration  
+- Feature flag logic  
+- Module enable/disable pipeline  
+
+### **6. Tooltip System**
+Pointer to:  
+`/docs/modules/tooltips/`  
+A deep-dive into the two-tier tooltip architecture, editor, inheritance, and metadata model.
+
+---
+
+## 🔧 What “Core” Means in IsoStack
+
+Core contains the **invariant features** of the system — the parts that remain stable across all apps and tenants:
+
+- Core authentication  
+- Multi-tenant boundary checks  
+- Role & permission enforcement  
+- Standard layouts, headers, and navigation  
+- Cross-tenant admin capabilities  
+- Global settings & branding  
+- Multi-tenant isolation patterns  
+- API conventions and error responses  
+
+If it affects *every module*, *every tenant*, or *every app*, it belongs in Core.
+
+---
+
+## 🧠 When to Update Core (Rules)
+
+Update core only when:
+
+1. A platform-wide improvement is needed  
+2. A new invariant feature is added (e.g., organisation status)  
+3. A fix affects all modules/tenants  
+4. A new architectural principle is introduced  
+5. Documentation is required for future AI-assisted development
+
+Avoid modifying Core when:
+
+- The feature is module-specific  
+- The feature is tenant-specific  
+- You’re implementing custom UI or app-specific logic  
+- You’re not sure — ask or document first
+
+---
+
+## 🤖 Using This Folder With AI Assistants
+
+When asking AI for development help:
+
+- Reference these documents explicitly  
+- Never let AI override architectural principles documented here  
+- Ask AI to confirm all changes align with Core’s invariants  
+- Provide file paths when requesting edits (AI will follow them)  
+- AI should never use cached versions—always request latest content from GitHub or VS
+
+---
+
+## 📌 Summary
+
+This folder defines the foundation of IsoStack.  
+If something impacts all apps, all tenants, or the platform itself — it belongs here.
+
+Before making changes, always ask:
+
+> “Does this affect *every* IsoStack app for *every* tenant?”
+
+If yes → Core.  
+If no → Module or App-level.
+
+---

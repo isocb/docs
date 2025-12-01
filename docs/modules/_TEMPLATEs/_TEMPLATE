@@ -1,0 +1,628 @@
+Below is a **complete GitHub-ready template folder** you can drop directly into:
+
+```
+/docs/modules/_TEMPLATE/
+```
+
+It includes:
+
+* `_README.md` — overview of how module docs work
+* `_feature-flags.md` — the template you asked for
+* `_architecture.md` — module-level technical architecture
+* `_api.md` — API/tRPC template
+* `_ui.md` — UI patterns, pages, components
+* `_database.md` — module database schema guidance
+* `_tooltips.md` — tooltip IDs and guidance
+* `_checklist.md` — module delivery checklist
+* `_changelog.md` — version notes
+
+Each file is written to be filled in by module authors, follows IsoStack conventions, and is optimised for AI agents to understand and help.
+
+---
+
+# 📁 **/docs/modules/_TEMPLATE/**
+
+**A complete template folder for creating new module documentation**
+
+Paste this whole folder structure into your repo:
+
+```
+/docs
+  /modules
+    /_TEMPLATE
+      _README.md
+      _architecture.md
+      _feature-flags.md
+      _api.md
+      _ui.md
+      _database.md
+      _tooltips.md
+      _checklist.md
+      _changelog.md
+```
+
+Below are the contents of each file.
+
+---
+
+# 📄 `/docs/modules/_TEMPLATE/_README.md`
+
+```md
+# Module Documentation Template
+
+**Location:** `/docs/modules/<module>/`  
+**Purpose:** Provide a complete documentation suite for any IsoStack module.  
+**Audience:** Developers, architects, AI agents.
+
+This folder defines the standard structure and content required for all new modules in the IsoStack ecosystem.
+
+Follow this structure when creating a new module:
+
+```
+
+/docs/modules/<module>/
+_architecture.md
+_feature-flags.md
+_database.md
+_api.md
+_ui.md
+_tooltips.md
+_checklist.md
+_changelog.md
+
+```
+
+Each file is a template that the module author must fill in.
+
+## 🚀 How to Use
+
+1. Copy the entire `_TEMPLATE` folder  
+2. Paste it as `/docs/modules/<your-module-name>/`  
+3. Replace placeholder values:
+   - `<Module Name>`
+   - `<module>`
+   - `<flagKey>`
+4. Delete `_README.md` if you do not want it in the final module docs.
+
+## Why This Exists
+
+- Standardises module documentation
+- Ensures all modules integrate correctly with:
+  - Feature flags  
+  - Multi-tenancy  
+  - Permissions  
+  - Tooltips  
+  - Module registry  
+  - DB schema  
+  - UI routes  
+- Helps AI agents update and extend modules safely
+
+```
+
+Build once. Document consistently. Maintain forever.
+
+```
+```
+
+---
+
+# 📄 `/docs/modules/_TEMPLATE/_architecture.md`
+
+```md
+# <Module Name> — Architecture
+
+**Location:** `/docs/modules/<module>/_architecture.md`  
+**Purpose:** Explain the module from a technical and architectural perspective.
+
+---
+
+## 1. Module Overview
+
+- **Module name:** <Module Name>
+- **Module ID:** `<module>`
+- **Live path:** `/app/<module>`
+- **Feature flag:** `<flagKey>`
+- **Dependencies:** <list or "None">
+
+---
+
+## 2. Purpose
+
+Explain what this module exists to do from a high-level architectural perspective.
+
+---
+
+## 3. Scope (Boundaries)
+
+Describe what *is* and *is not* inside this module.
+
+Example:
+
+### In Scope
+- CRUD for `<module>Item`
+- Metrics and dashboards
+- Module-specific settings
+
+### Out of Scope
+- Billing  
+- Authentication  
+- Cross-module logic (must use core APIs)
+
+---
+
+## 4. Relationships
+
+### Multi-tenancy
+How the module stores tenant ownership:
+```
+
+organizationId → Organization.id
+
+```
+
+### User roles
+Detail which roles can access this module.
+
+---
+
+## 5. Component Layers
+
+- **Frontend (`/src/app/(app)/<module>`)**  
+  Pages, components, forms.
+
+- **Backend (`/src/server/modules/<module>.router.ts`)**  
+  tRPC endpoints, validation, business logic.
+
+- **Database (Prisma model)**  
+  Table(s) owned by this module.
+
+- **Shared Core Dependencies**  
+  Examples:
+  - `auth.ts` (authentication)
+  - `middleware` (feature checks)
+  - `module.registry.ts`
+
+---
+
+## 6. Expected File Structure
+
+```
+
+src/modules/<module>/
+module.config.ts
+components/
+hooks/
+utils/
+
+src/app/(app)/<module>/
+page.tsx
+settings/page.tsx
+[id]/page.tsx
+
+src/server/modules/<module>.router.ts
+
+```
+
+---
+
+## 7. Key Technical Considerations
+
+List constraints, rules, or patterns module authors must follow.
+
+Examples:
+
+- Always enforce feature flag before loading data  
+- Prisma queries must restrict by `organizationId`  
+- Use Tooltip anchors for all user-facing features  
+- Avoid tight coupling with other modules  
+
+---
+
+## 8. Risks & Edge Cases
+
+Document module-specific risks or gotchas.
+
+---
+
+## 9. Future Enhancements
+
+Optional forward-looking ideas.
+
+```
+
+---
+
+# 📄 `/docs/modules/_TEMPLATE/_feature-flags.md`
+
+*(This is the full template you requested — included again for completeness)*
+
+```md
+# Feature Flags — <Module Name>
+
+**Location:** `/docs/modules/<module>/_feature-flags.md`  
+**Purpose:** Define how this module uses IsoStack feature flags.
+
+# 1. Module Identification
+- **Module Name:** <Module Name>
+- **Module ID:** `<module>`
+- **Feature Flag Key:** `<flagKey>`
+- **Default State:** <true/false>
+
+# 2. Purpose of This Feature Flag
+Explain what enabling/disabling the module does.
+
+# 3. Tenant Behaviour
+Describe what tenants experience when flag is ON vs OFF.
+
+# 4. Frontend Usage
+Provide code examples for:
+- Navigation
+- Page protection
+- Component rendering
+
+# 5. Backend Usage
+Middleware + router examples enforcing the flag.
+
+# 6. Dependencies
+List required modules if any.
+
+# 7. Tooltip Behaviour
+Document tooltip anchor IDs and rules.
+
+# 8. Migration & Rollout Notes
+What happens when the module is enabled/disabled.
+
+# 9. Testing Checklist
+Ticklist for devs.
+
+# 10. Changelog
+Versioned updates.
+```
+
+---
+
+# 📄 `/docs/modules/_TEMPLATE/_api.md`
+
+```md
+# <Module Name> — API & tRPC Endpoints
+
+**Location:** `/docs/modules/<module>/_api.md`  
+**Purpose:** Document all backend behaviour of this module.
+
+---
+
+## 1. Overview
+
+API router file:
+
+```
+
+src/server/modules/<module>.router.ts
+
+```
+
+Uses:
+
+- tRPC
+- Zod validation
+- Prisma client
+- Feature flag checks
+- Role checks (OWNER / ADMIN / MEMBER)
+
+---
+
+## 2. Endpoints
+
+Document each endpoint:
+
+### Example format:
+
+### `list`
+```
+
+GET /api/<module>/list
+
+````
+- **Purpose**: Return all `<module>Items` for the tenant.
+- **Feature flag required**: `<flagKey>`
+- **Roles**: MEMBER+
+
+#### Input
+```ts
+z.object({})
+````
+
+#### Output
+
+```ts
+Array<<module>Item>
+```
+
+#### Pseudocode
+
+```ts
+return prisma.<module>Item.findMany({
+  where: { organizationId: ctx.session.user.organizationId }
+});
+```
+
+---
+
+### Add similar sections for:
+
+* `get`
+* `create`
+* `update`
+* `delete`
+* `settings`
+* `analytics` (if applicable)
+
+---
+
+## 3. Middleware
+
+Document any module-level middleware:
+
+* Feature enforcement
+* Role enforcement
+* Schema validation
+
+---
+
+## 4. Error Cases
+
+List all module-specific error conditions.
+
+---
+
+## 5. Future API Extensions
+
+Optional roadmap notes.
+
+````
+
+---
+
+# 📄 `/docs/modules/_TEMPLATE/_ui.md`
+
+```md
+# <Module Name> — UI & UX
+
+**Location:** `/docs/modules/<module>/_ui.md`  
+**Purpose:** Document the UI structure, routes, layouts, user flows.
+
+---
+
+## 1. Routes
+
+Document:
+
+````
+
+/app/<module>
+/app/<module>/settings
+/app/<module>/[id]
+
+```
+
+---
+
+## 2. Components
+
+List core components:
+
+- Page layout  
+- List/table view  
+- Forms  
+- Cards  
+- Widgets  
+
+---
+
+## 3. User Flow Diagrams
+
+Optional:
+
+```
+
+Dashboard → <Module Page> → Item → Save → Success
+
+```
+
+---
+
+## 4. Tooltip Anchors
+
+List relevant tooltip IDs.
+
+---
+
+## 5. Accessibility Notes
+
+Document:
+
+- Keyboard navigation  
+- Aria labels  
+- Required semantics  
+
+---
+
+## 6. Future UI Enhancements
+
+Ideas for later releases.
+
+```
+
+---
+
+# 📄 `/docs/modules/_TEMPLATE/_database.md`
+
+````md
+# <Module Name> — Database Schema
+
+**Location:** `/docs/modules/<module>/_database.md`  
+**Purpose:** Define the Prisma schema + data architecture for the module.
+
+---
+
+## 1. Prisma Models
+
+Provide the full schema:
+
+```prisma
+model <ModuleItem> {
+  id        String   @id @default(uuid())
+  name      String
+  data      Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+````
+
+---
+
+## 2. Multi-Tenant Data Rules
+
+* Always include `organizationId`
+* Always restrict queries by tenant
+* Never store cross-tenant data
+
+---
+
+## 3. Indexes
+
+Document indexes, e.g.:
+
+```
+@@index([organizationId])
+@@unique([organizationId, name])
+```
+
+---
+
+## 4. Seed Data (Optional)
+
+Example initial values.
+
+---
+
+## 5. Future Schema Extensions
+
+Notes for future migrations.
+
+````
+
+---
+
+# 📄 `/docs/modules/_TEMPLATE/_tooltips.md`
+
+```md
+# <Module Name> — Tooltip Specification
+
+**Location:** `/docs/modules/<module>/_tooltips.md`
+
+---
+
+## 1. Tooltip Purpose
+
+Explain what help content this module provides.
+
+---
+
+## 2. Tooltip IDs
+
+List all tooltips belonging to the module:
+
+````
+
+<module>.welcome <module>.item.list <module>.item.edit <module>.settings.general
+
+```
+
+---
+
+## 3. Notes for Tooltip Authors
+
+- Each tooltip inherits Platform → Tenant  
+- Tenants may override individually  
+- Keep content short, actionable  
+- Add media via Cloudflare R2 if useful  
+
+---
+
+## 4. Future Tooltips
+
+Record IDs for planned UI expansions.
+```
+
+---
+
+# 📄 `/docs/modules/_TEMPLATE/_checklist.md`
+
+```md
+# <Module Name> — Developer Checklist
+
+### Before Development
+- [ ] Module folder created in `/src/modules/<module>/`
+- [ ] Module docs folder created in `/docs/modules/<module>/`
+- [ ] Feature flag chosen & added to platform defaults
+- [ ] Design reviewed
+
+### During Development
+- [ ] module.config.ts completed
+- [ ] Feature flag enforced in backend
+- [ ] Feature flag used in navigation & UI
+- [ ] Prisma schema created & migrated
+- [ ] Pages created (`/app/<module>`)
+- [ ] Tooltips added
+- [ ] Audit logging added (when appropriate)
+
+### After Development
+- [ ] End-to-end testing complete
+- [ ] Tenant ON/OFF behaviour verified
+- [ ] Tooltip inheritance functional
+- [ ] Documentation completed
+- [ ] Added to module registry
+```
+
+---
+
+# 📄 `/docs/modules/_TEMPLATE/_changelog.md`
+
+```md
+# <Module Name> — Changelog
+
+All changes to this module documented here.
+
+---
+
+## 1.0.0 — Initial Release
+- Created module
+- Added feature flag
+- Implemented CRUD
+- Added settings page
+- Added tooltips
+- Added documentation
+
+## 1.1.0 — Improvements
+- Added analytics
+- Improved UI components
+- Updated validation schema
+
+## 1.2.0 — Bug Fixes
+- Fixed multi-tenant query issues
+- Fixed tooltip IDs
+```
+
+---
+
+# ✔ All Done
+
+You now have a complete, professional, AI-ready **Module Documentation Template** for:
+
+```
+/docs/modules/_TEMPLATE/
+```

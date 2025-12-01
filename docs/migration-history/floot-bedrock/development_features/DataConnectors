@@ -1,0 +1,360 @@
+# Bedrock Data Connectors Architecture
+
+**Document Version:** 1.0  
+**Date:** 2025-11-13  
+**Author:** isocbIn
+
+## Overview
+
+This document outlines the architecture for Bedrock's extensible data connector system, which allows integration with multiple external data sources through a standardized, pluggable connector framework.
+
+## Vision
+
+Enable Bedrock to connect to various external data sources (databases, APIs, spreadsheets) through a two-tier system where:
+- **Development tier**: Developers create, test, and certify connectors
+- **Client tier**: Clients configure and use pre-built connectors for their projects
+
+## Current State
+
+### Google Sheets Integration (Existing)
+- **Status**: Baked into Bedrock core (remains untouched)
+- **Method**: Public shared link access
+- **Authentication**: No API key required (public links only)
+- **Scope**: Read-only access to publicly shared sheets
+
+## Proposed Architecture
+
+### Core Components
+
+#### 1. Connector Interface (Standard Contract)
+All data connectors must implement:
+
+```typescript
+interface DataConnector {
+  // Metadata
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  
+  // Configuration
+  getConfigSchema(): ConfigSchema;
+  validateConfig(config: ConnectorConfig): ValidationResult;
+  
+  // Connection
+  connect(credentials: ConnectorCredentials): Promise<Connection>;
+  disconnect(): Promise<void>;
+  testConnection(): Promise<TestResult>;
+  
+  // Data Operations
+  getObjects(): Promise<DataObject[]>;  // List available tables/objects
+  getSchema(objectId: string): Promise<Schema>;
+  query(objectId: string, filters?: QueryFilters): Promise<DataResult>;
+  
+  // Metadata
+  getCapabilities(): ConnectorCapabilities;
+}
+```
+
+#### 2. Connector Registry
+- Central registry of available connectors
+- Each connector registered with metadata (name, version, capabilities)
+- Allows dynamic loading and discovery
+
+#### 3. Client Configuration Storage
+Per-client storage of:
+- Enabled connectors
+- Connector credentials (encrypted)
+- Connection parameters (URLs, app IDs, etc.)
+- Access permissions
+
+#### 4. Project Data Source Binding
+- Projects reference which connector(s) they use
+- Project-level configuration overrides
+- Data source selection UI during project setup
+
+### Data Flow
+
+```
+Client Setup → Enable Connector → Store Credentials
+                      ↓
+Project Setup → Select Data Source → Choose Connector
+                      ↓
+Runtime → Connector connects → Fetch Data → Link to Bedrock entities
+```
+
+## First Implementation: Knack Database Connector
+
+### Why Knack First?
+- Well-documented RESTful API
+- Common use case for clients
+- Establishes pattern for future connectors
+- Manageable complexity for initial implementation
+
+### Knack API Overview
+
+**Base URL**: `https://api.knack.com/v1/`
+
+**Authentication Headers**:
+```
+X-Knack-Application-Id: {app_id}
+X-Knack-REST-API-Key: {api_key}
+```
+
+**Key Endpoints**:
+- `GET /objects/object_{id}/records` - Retrieve records
+- `POST /objects/object_{id}/records` - Create record
+- `PUT /objects/object_{id}/records/{record_id}` - Update record
+- `DELETE /objects/object_{id}/records/{record_id}` - Delete record
+
+**Features**:
+- Filtering, sorting, pagination via query parameters
+- JSON request/response format
+- Rate limit: 10 requests/second per API key
+- Object-based (full access) and View-based (restricted) requests
+
+### Knack Connector Configuration
+
+#### Client Setup Requirements
+Store in `clients` table or dedicated `client_connectors` table:
+
+```json
+{
+  "connector_id": "knack",
+  "connector_name": "Knack Database",
+  "enabled": true,
+  "credentials": {
+    "application_id": "encrypted_app_id",
+    "api_key": "encrypted_api_key",
+    "application_url": "https://app-name.knack.com"
+  },
+  "settings": {
+    "rate_limit": 10,
+    "default_page_size": 100,
+    "cache_ttl": 300
+  }
+}
+```
+
+#### Project Configuration
+Store in `projects` table or dedicated `project_data_sources` table:
+
+```json
+{
+  "project_id": "uuid",
+  "data_sources": [
+    {
+      "connector_id": "knack",
+      "source_name": "Customer Database",
+      "objects": [
+        {
+          "object_key": "object_1",
+          "object_name": "Customers",
+          "sync_enabled": true,
+          "refresh_interval": 3600
+        },
+        {
+          "object_key": "object_2",
+          "object_name": "Orders",
+          "sync_enabled": true,
+          "refresh_interval": 1800
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Knack Connector Implementation Plan
+
+#### Phase 1: Core Connector
+- [ ] Implement `KnackConnector` class following interface
+- [ ] Authentication and connection testing
+- [ ] List available objects (tables)
+- [ ] Fetch schema for an object
+- [ ] Basic record retrieval (with pagination)
+
+#### Phase 2: Query Features
+- [ ] Filtering support
+- [ ] Sorting support
+- [ ] Field selection
+- [ ] Related record expansion
+
+#### Phase 3: Caching & Performance
+- [ ] Response caching
+- [ ] Rate limit handling
+- [ ] Batch request optimization
+- [ ] Error handling and retries
+
+#### Phase 4: UI Integration
+- [ ] Client setup UI for Knack credentials
+- [ ] Project data source selection
+- [ ] Object browser/selector
+- [ ] Connection testing UI
+
+### Security Considerations
+
+1. **Credential Storage**
+   - Encrypt API keys at rest
+   - Use environment variables for sensitive data
+   - Implement secure key rotation
+
+2. **Access Control**
+   - Client-level isolation (clients can't access each other's connectors)
+   - Project-level permissions
+   - Audit logging for data access
+
+3. **API Key Management**
+   - Store in encrypted format
+   - Never log or expose in errors
+   - Validate on every request
+
+4. **Rate Limiting**
+   - Respect Knack's 10 req/sec limit
+   - Implement client-side throttling
+   - Queue requests if needed
+
+### Error Handling
+
+```typescript
+enum ConnectorErrorType {
+  AUTHENTICATION_FAILED,
+  CONNECTION_TIMEOUT,
+  RATE_LIMIT_EXCEEDED,
+  INVALID_OBJECT,
+  PERMISSION_DENIED,
+  NETWORK_ERROR,
+  INVALID_RESPONSE
+}
+
+interface ConnectorError {
+  type: ConnectorErrorType;
+  message: string;
+  retryable: boolean;
+  retryAfter?: number;
+}
+```
+
+## Future Connectors
+
+### Planned Connectors
+1. **CSV File** (read-only)
+   - Local file upload
+   - Remote URL fetch
+   - Column mapping
+
+2. **PostgreSQL** (read/write)
+   - Connection string configuration
+   - Table selection
+   - Query builder
+
+3. **MySQL** (read/write)
+   - Similar to PostgreSQL
+   - Specific MySQL optimizations
+
+4. **Airtable** (read/write)
+   - Similar pattern to Knack
+   - Personal access tokens
+
+5. **Microsoft SQL Server** (read/write)
+   - Enterprise database support
+
+### Connector Development Workflow
+
+1. **Develop**: Create connector implementation
+2. **Test**: Unit tests, integration tests, manual testing
+3. **Certify**: Security review, performance testing
+4. **Deploy**: Add to connector registry
+5. **Enable**: Available for client configuration
+
+## Database Schema
+
+### `connectors` table
+```sql
+CREATE TABLE connectors (
+  id UUID PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  slug VARCHAR(50) UNIQUE NOT NULL,
+  description TEXT,
+  version VARCHAR(20),
+  is_active BOOLEAN DEFAULT true,
+  capabilities JSONB,
+  config_schema JSONB,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+### `client_connectors` table
+```sql
+CREATE TABLE client_connectors (
+  id UUID PRIMARY KEY,
+  client_id UUID REFERENCES clients(id),
+  connector_id UUID REFERENCES connectors(id),
+  credentials JSONB, -- encrypted
+  settings JSONB,
+  is_enabled BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(client_id, connector_id)
+);
+```
+
+### `project_data_sources` table
+```sql
+CREATE TABLE project_data_sources (
+  id UUID PRIMARY KEY,
+  project_id UUID REFERENCES projects(id),
+  client_connector_id UUID REFERENCES client_connectors(id),
+  source_name VARCHAR(100),
+  configuration JSONB,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+## Implementation Priorities
+
+### Immediate (MVP)
+1. Define connector interface
+2. Implement Knack connector
+3. Basic client configuration storage
+4. Simple project data source selection
+
+### Short-term
+1. Caching layer
+2. Rate limiting framework
+3. Error handling framework
+4. Admin UI for connector management
+
+### Medium-term
+1. CSV connector
+2. PostgreSQL connector
+3. Advanced query builder
+4. Data transformation layer
+
+### Long-term
+1. Real-time sync/webhooks
+2. Bi-directional sync
+3. Data conflict resolution
+4. Advanced caching strategies
+
+## Benefits
+
+1. **Extensibility**: Add new data sources without core changes
+2. **Reusability**: Build once, use for all clients
+3. **Security**: Isolated credentials per client
+4. **Flexibility**: Clients choose their data sources
+5. **Scalability**: Standardized interface makes optimization easier
+6. **Maintainability**: Clear separation of concerns
+
+## References
+
+- [Knack API Documentation](https://docs.knack.com/reference/using-the-api)
+- [Knack API Introduction](https://docs.knack.com/reference/introduction-to-the-api)
+- [Knack Integration Guide](https://rollout.com/integration-guides/knack/reading-and-writing-data-using-the-knack-api)
+
+---
+
+**Next Steps**: Begin implementation of `KnackConnector` class following the interface defined above.
