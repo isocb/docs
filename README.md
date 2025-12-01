@@ -1,5 +1,5 @@
-Below is a **clean, professional, future-proof `README.md`** for the root of your `docs` repository.
-It explains:
+
+# This Document explains:
 
 * the purpose of the documentation hub
 * how the structure works
@@ -10,11 +10,10 @@ It explains:
 
 It’s written for internal use — by you, Sue, future staff, contractors, or AI agents.
 
-You can copy/paste this directly into `README.md`.
 
 ---
 
-# **Isoblue Documentation Hub**
+## **Isoblue Documentation Hub**
 
 *Internal Development Documentation — Not for External Distribution*
 
