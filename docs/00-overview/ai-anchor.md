@@ -1,6 +1,6 @@
 # AI CONTEXT ANCHOR
 
-This document defines HOW the AI should think and respond when assisting isocb.
+This document defines HOW the AI should think and respond when assisting isocb - Chris.
 
 ---
 
